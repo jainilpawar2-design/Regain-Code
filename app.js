@@ -1,16 +1,65 @@
 const dataKey = "regainCodeTimerData";
 
+const badges = [
+    { 
+        id: "first_session",
+        title: "First Commit",
+        desc: "Log your first coding session.",
+        isUnlocked: (data) => data.sessions.length >= 1,
+    },
+    {
+        id: "one_hour",
+        title:"One-Hour Flow",
+        desc: "Reach 1 hour total coding time.",
+        isUnlocked: (data) => data.totalSeconds >= 3600,
+    },
+    {
+        id: "three_hours",
+        title: "Deep Focus",
+        desc: "Reach 3 hour total coding timer.",
+        isUnlocked: (data) => data.totalSeconds >= 10800,
+    },
+    {
+        id: "ten_sessions",
+        title: "Te Logs",
+        desc: "Complete 10 coding sessions.",
+        isUnlocked: (data) => data.sessions.length >= 10,
+    },
+    {
+        id: "long_session",
+        title: "Long Haul",
+        desc: "Log a session longer than 2 hours.",
+        isUnlocked: (data) => data.streak.some((s) => s.duration >= 7200),
+    },
+    {
+        id: "streak_3",
+        title: "Streak 3",
+        desc: "Code 3 days in a row.",
+        isUnlocked: (data) => data.streak.best >= 3,
+    },
+    {
+        id: "streak_7",
+        title: "Streak 7",
+        desc: " Code 7 days in a row",
+        isUnlocked: (data) => data.streak.best >= 7,
+    },
+];
+
 const defaultData = {
     profileName: "Coder",
     totalSeconds: 0,
     sessions: [],
-    streak: { current: 0, best: 0, lastDate: null },
+    streak: {
+        current: 0,
+        best: 0,
+        lastDate: useCallback,
+},
 };
 
 const timerDisplay = document.getElementById("timerDisplay");
 const timerSub = document.getElementById("timerSub");
 const startBtn = document.getElementById("startBtn");
-const pauseBtn = document.getElementById("pause");
+const pauseBtn = document.getElementById("pauseBtn");
 const resetBtn = document.getElementById("resetBtn");
 const logBtn = document.getElementById("logBtn");
 const totalTime = document.getElementById("totalTime");
@@ -18,6 +67,10 @@ const streak = document.getElementById("streak");
 const bestStresk = document.getElementById("bestStreak");
 const profileNameInput = document.getElementById("profileName");
 const historyList = document.getElementById("historyList");
+const  profilePill = document.getElementById("profilePill");
+const badgeGrid = document.getElementById("badgeGrid");
+const topSessions = document.getElementById("topSessions");
+const topDays = document.getElementById("topDays");
 
 let data = loadData();
 let timerInterval = null;
@@ -95,8 +148,66 @@ function renderHistory() {
         const date = new Date(session.end);
         return `<div class="history-item"><span>${date.toLocaleString()}</span><strong>${formatShort(session.duration)}</strong></div>`;
     })
-    .join("")
-    : "<div class=\"history-item\">No sessions logged yet.</div>";
+    .join("");
+
+    if (!recent.length) {
+    historyList.innerHTML = "<div class=\"history-item\">No sessions logged yet.</div>";
+}
+}
+
+function renderProfile() {
+    profilePill.textContent = data.profileName || "Coder";
+    profileNameInput.value = data.profileName || "";
+}
+
+function renderBadges () {
+    badgeGrid.innerHtml ="";
+    badges.forEach(badge) => {
+        const unlocked = badge.isUnlocked(data);
+        const item = document.createElement("div");
+        item.className = `badge ${unlocked ? "" : "locked"}`.trim();
+        item.innerHTML = `
+        <div class="badge-title">${badge.title}</div>
+        <div class="badge-desc">${badge.desc}</div>
+        `;
+        badge.Grid.appendChild(item);
+    });
+}
+
+function renderLeaderboard () {
+    const top = [...data.sessions]
+    .sort((a, b) => b.duration - a.duration)
+    .slice(0, 5);
+
+    topSessions.innerHTML = top
+    .map((session) => {
+        const date = new Date(session.end);
+        return `<li>${formatShort(session.duration)} on ${date.toLocaleDateString()}</LI>`;
+    })
+    .join("");
+
+    if (!top.length) {
+        topSessions.innerHTML = "<li>No sessions yet.</li>";
+    }
+
+    const totalByDay = data.sessions.reduce((acc, session) => {
+        const key = dateKey(new Date(session.end));
+        acc[key] = (acc[key] || 0) + session.duration;
+        return acc;
+    }, {});
+
+    const dayEntries = Object.entries(totalByDay)
+    .map(([key, total]) => ({key, total }))
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 5);
+
+    topDays.innerHTML = dayEntries
+    .map((entry) => `<li>${formatShort(entry.total)} on ${entry.key}</li>`)
+    .join("");
+
+    if (!dayEntries.length) {
+        topDays.innerHTML = "<li>No days yet.</li>";
+    }
 }
 
 function updateStreak(endDate) {

@@ -3,15 +3,31 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="description" content="A minimal in-browser coding session stopwatch." />
+        <meta name="description" content="Coding timer with streaks, badges, and local leaderboards. " />
         <title>Regain Code Timer - Step 1</title>
         <link rel="stylesheet" href="style.css" />
     </head>
     <body>
-        <main class="wrap">
-            <section class="card">
+        <div class="page">
+            <header class="hero">
+            <div>
+                <p class="eyebrow hero-eyebrow">Coding tracker</p>
+                <h1 class="hero-title">Regain Code Timer</h1>
+                <p class="intro">Step 3 adds badges, leaderboards, and a wider dashboard layout.</p>
+            </div>
+            <div class="profile-chip" id="profilePill">Coder</div>
+        </header>
+
+        <main class="wrap layout">
+            <section class="card panel timer-panel">
+                <div class="panel-head">
+                    <div>
+                        <h2 class="panel-h2">Current Session</h2>
+                        <p class="panel-lede">Everything below keeps the Step 1 timer block.</p>
+                    </div>
+                </div>
                 <p class="eyebrow">Step 1</p>
-                <h1>Basic Coding Timer</h1>
+                <h2 class="timer-heading">Basic Coding Timer</h2>
                 <p class="copy">A simple stopwatch for coding sessions.</p>
                 <p class="copy copy-step2">This step adds local save, streaks, and a session list.</p>
                 <label class="field" for="profileName">Name</label>
@@ -30,11 +46,47 @@
                     <div><span>Best</span><strong id="bestStreak">0 days</strong></div>
                 </div>
             </section>
-            <section class="card card-history">
-            <h2>Recent Sessions</h2>
+
+            <section class="card panel">
+                <div class="panel-head">
+                    <div>
+                        <h2 class="panel-h2">Badges</h2>
+                        <p class="panel-lede">Small milestones to keep the momentum going.</p>
+                    </div>
+                </div>
+                <div class="badge-grid" id=badgeGrid></div>
+            </section>
+
+            <section class="card panel">
+                <div class="panel-head">
+                    <div>
+                        <h2 class="panel-h2">Leaderboard</h2>
+                        <p class="panel-lede">Stored on your device only.</p>
+                    </div>
+                </div>
+                <div class="leaderboard-grid">
+                    <div class="list-card">
+                        <h3>Top Sessions</h3>
+                        <ol id="topSessions"></ol>
+                    </div>
+                    <div class="list-card">
+                        <h3>Top Days</h3>
+                        <ol id="topDays"></ol>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card panel card-history">
+                <div class="panel-head">
+                    <div>
+            <h2 class="panel-h2">Recent Sessions</h2>
+            <p class="panel-lede">Your latest saved coding logs.</p>
+                    </div>
+                </div>
             <div id="historyList" class="history"></div>
         </section>
         </main>
+    </div>
         <script src="app.js"></script>
     </body>
     </html>
