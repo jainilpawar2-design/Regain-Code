@@ -21,7 +21,7 @@ const badges = [
     },
     {
         id: "ten_sessions",
-        title: "Te Logs",
+        title: "Ten Logs",
         desc: "Complete 10 coding sessions.",
         isUnlocked: (data) => data.sessions.length >= 10,
     },
@@ -29,7 +29,7 @@ const badges = [
         id: "long_session",
         title: "Long Haul",
         desc: "Log a session longer than 2 hours.",
-        isUnlocked: (data) => data.streak.some((s) => s.duration >= 7200),
+        isUnlocked: (data) => data.sessions.some((s) => s.duration >= 7200),
     },
     {
         id: "streak_3",
@@ -40,7 +40,7 @@ const badges = [
     {
         id: "streak_7",
         title: "Streak 7",
-        desc: " Code 7 days in a row",
+        desc: "Code 7 days in a row",
         isUnlocked: (data) => data.streak.best >= 7,
     },
 ];
@@ -53,7 +53,7 @@ const defaultData = {
         current: 0,
         best: 0,
         lastDate: null,
-},
+    },
 };
 
 const timerDisplay = document.getElementById("timerDisplay");
@@ -64,7 +64,7 @@ const logBtn = document.getElementById("logBtn");
 const resetBtn = document.getElementById("resetBtn");
 const totalTime = document.getElementById("totalTime");
 const streak = document.getElementById("streak");
-const bestStresk = document.getElementById("bestStreak");
+const bestStreak = document.getElementById("bestStreak");
 const profileNameInput = document.getElementById("profileName");
 const historyList = document.getElementById("historyList");
 const  profilePill = document.getElementById("profilePill");
@@ -114,7 +114,7 @@ function formatShort(seconds) {
     return `${hrs}h ${mins}m`;
 }
 
-function dataKey(date) {
+function dateKey(date) {
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, "0");
     const d = String(date.getDate()).padStart(2, "0");
@@ -122,7 +122,7 @@ function dataKey(date) {
 }
 
 function isYesterday(prevKey, todayKey) {
-    const  prev = new Date(`${previousKey}T00:00:00`);
+    const  prev = new Date(`${prevKey}T00:00:00`);
     const today = new Date(`${todayKey}T00:00:00` );
     return today - prev === 86400000;
 }
@@ -142,7 +142,7 @@ function updateTimerDisplay() {
 function renderStats() {
     totalTime.textContent = formatShort(data.totalSeconds);
     streak.textContent = `${data.streak.current} days` ;
-    bestStresk.textContent = `${data.streak.best} days` ;
+    bestStreak.textContent = `${data.streak.best} days` ;
     profileNameInput.value = data.profileName || "";
 }
 
@@ -157,7 +157,8 @@ function renderHistory() {
         const date = new Date(session.end);
         return `<div class="history-item"><span>${date.toLocaleString()}</span><strong>${formatShort(session.duration)}</strong></div>`;
     })
-    .join(""):
+    .join("")
+    : "";
 
     if (!recent.length) {
     historyList.innerHTML = "<div class=\"history-item\">No sessions logged yet.</div>";
@@ -169,9 +170,9 @@ function renderProfile() {
     profileNameInput.value = data.profileName || "";
 }
 
-function renderBadges () {
-    badgeGrid.innerHTML ="";
-    badges.forEach(badge) => {
+function renderBadges() {
+    badgeGrid.innerHTML = "";
+    badges.forEach((badge) => {
         const unlocked = badge.isUnlocked(data);
         const div = document.createElement("div");
         div.className = `badge ${unlocked ? "" : "locked"}`.trim();
@@ -179,11 +180,11 @@ function renderBadges () {
         <div class="badge-title">${badge.title}</div>
         <div class="badge-desc">${badge.desc}</div>
         `;
-        badge.Grid.appendChild(div);
+        badgeGrid.appendChild(div);
     });
 }
 
-function renderLeaderboard () {
+function renderLeaderboard() {
     const top = [...data.sessions]
     .sort((a, b) => b.duration - a.duration)
     .slice(0, 5);
@@ -191,7 +192,7 @@ function renderLeaderboard () {
     topSessions.innerHTML = top
     .map((session) => {
         const date = new Date(session.end);
-        return `<li>${formatShort(session.duration)} on ${date.toLocaleDateString()}</LI>`;
+        return `<li>${formatShort(session.duration)} on ${date.toLocaleDateString()}</li>`;
     })
     .join("");
 
@@ -220,7 +221,7 @@ function renderLeaderboard () {
 }
 
 function updateStreak(endDate) {
-    const todayKey = dataKey(endDate);
+    const todayKey = dateKey(endDate);
     const lastKey = data.streak.lastDate;
 
     if (!lastKey) {
@@ -242,7 +243,7 @@ function startTimer() {
     startTimestamp = Date.now() - elapsedSeconds * 1000;
     timerInterval = setInterval(() => {
         elapsedSeconds = Math.floor((Date.now() - startTimestamp) / 1000);
-        render();
+        updateTimerDisplay();
     }, 1000);
     timerSub.textContent = "Session running.";
 }
@@ -259,14 +260,8 @@ function resetTimer() {
     timerInterval = null;
     elapsedSeconds = 0;
     startTimestamp = null;
-    render();
+    updateTimerDisplay();
     timerSub.textContent = "Ready to start.";
-}
-
-function resetTimer() {
-    clearInterval(timerInterval)
-    timerInterval = null;
-    timerSub.textContent = "Paused. Resume when ready.";
 }
 
 function logSession() {
@@ -282,7 +277,7 @@ function logSession() {
     data.sessions.push({
         id: `${Date.now()}`,
         start: start.toISOString(),
-        end: endtoISOString(),
+        end: end.toISOString(),
         duration,
     });
 
@@ -292,11 +287,8 @@ function logSession() {
     resetTimer();
     renderStats();
     renderHistory();
-}
-
-function renderProfile() {
-    profilePill.textContent = data.profileName || "Coder";
-    profileNameInput.value = data.profileName || "";
+    renderBadges();
+    renderLeaderboard();
 }
 
 function renderAll() {
