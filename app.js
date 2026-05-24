@@ -52,7 +52,7 @@ const defaultData = {
     streak: {
         current: 0,
         best: 0,
-        lastDate: useCallback,
+        lastDate: null,
 },
 };
 
@@ -60,8 +60,8 @@ const timerDisplay = document.getElementById("timerDisplay");
 const timerSub = document.getElementById("timerSub");
 const startBtn = document.getElementById("startBtn");
 const pauseBtn = document.getElementById("pauseBtn");
-const resetBtn = document.getElementById("resetBtn");
 const logBtn = document.getElementById("logBtn");
+const resetBtn = document.getElementById("resetBtn");
 const totalTime = document.getElementById("totalTime");
 const streak = document.getElementById("streak");
 const bestStresk = document.getElementById("bestStreak");
@@ -71,6 +71,7 @@ const  profilePill = document.getElementById("profilePill");
 const badgeGrid = document.getElementById("badgeGrid");
 const topSessions = document.getElementById("topSessions");
 const topDays = document.getElementById("topDays");
+const netStatus = document.getElementById("netStatus");
 
 let data = loadData();
 let timerInterval = null;
@@ -104,7 +105,7 @@ function formatTime(seconds) {
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
     const secs = Math.floor(seconds % 60);
-    return [hrs, mins, secs].map((value) => String(value).padStart(2, "0")).join(":");
+    return [hrs, mins, secs].map((v) => String(v).padStart(2, "0")).join(":");
 }
 
 function formatShort(seconds) {
@@ -120,13 +121,21 @@ function dataKey(date) {
     return `${y}-${m}-${d}`;
 }
 
-function isYesterday(date) {
+function isYesterday(prevKey, todayKey) {
     const  prev = new Date(`${previousKey}T00:00:00`);
     const today = new Date(`${todayKey}T00:00:00` );
     return today - prev === 86400000;
 }
 
-function render () {
+function updateNetStatus() {
+    if (navigator.onLine) {
+        netStatus.textContent = "Online and ready offline";
+    } else {
+        netStatus.textContent = "Using offline mode";
+    }
+}
+
+function updateTimerDisplay() {
     timerDisplay.textContent = formatTime(elapsedSeconds);
 }
 
@@ -148,7 +157,7 @@ function renderHistory() {
         const date = new Date(session.end);
         return `<div class="history-item"><span>${date.toLocaleString()}</span><strong>${formatShort(session.duration)}</strong></div>`;
     })
-    .join("");
+    .join(""):
 
     if (!recent.length) {
     historyList.innerHTML = "<div class=\"history-item\">No sessions logged yet.</div>";
@@ -161,16 +170,16 @@ function renderProfile() {
 }
 
 function renderBadges () {
-    badgeGrid.innerHtml ="";
+    badgeGrid.innerHTML ="";
     badges.forEach(badge) => {
         const unlocked = badge.isUnlocked(data);
-        const item = document.createElement("div");
-        item.className = `badge ${unlocked ? "" : "locked"}`.trim();
-        item.innerHTML = `
+        const div = document.createElement("div");
+        div.className = `badge ${unlocked ? "" : "locked"}`.trim();
+        div.innerHTML = `
         <div class="badge-title">${badge.title}</div>
         <div class="badge-desc">${badge.desc}</div>
         `;
-        badge.Grid.appendChild(item);
+        badge.Grid.appendChild(div);
     });
 }
 
@@ -254,6 +263,12 @@ function resetTimer() {
     timerSub.textContent = "Ready to start.";
 }
 
+function resetTimer() {
+    clearInterval(timerInterval)
+    timerInterval = null;
+    timerSub.textContent = "Paused. Resume when ready.";
+}
+
 function logSession() {
     if (elapsedSeconds <= 0) {
         timerSub.textContent = "Nothing to log yet.";
@@ -279,9 +294,23 @@ function logSession() {
     renderHistory();
 }
 
+function renderProfile() {
+    profilePill.textContent = data.profileName || "Coder";
+    profileNameInput.value = data.profileName || "";
+}
+
+function renderAll() {
+    renderProfile();
+    renderStats();
+    renderBadges();
+    renderLeaderboard();
+    renderHistory();
+}
+
 profileNameInput.addEventListener("input", (event) => {
     data.profileName = event.target.value.trim() || "Coder";
     saveData();
+    renderProfile();
 });
 
 startBtn.addEventListener("click", startTimer);
@@ -289,6 +318,9 @@ pauseBtn.addEventListener("click", pauseTimer);
 logBtn.addEventListener("click", logSession);
 resetBtn.addEventListener("click", resetTimer);
 
-render();
-renderStats();
-renderHistory();
+window.addEventListener("online", updateNetStatus);
+window.addEventListener("offline", updateNetStatus);
+
+updateNetStatus();
+updateTimerDisplay();
+renderAll();

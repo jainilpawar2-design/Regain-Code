@@ -1,0 +1,15 @@
+{
+    "name": "Regain Code Timer",
+    "short_name": "Code Timer",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#fff4e8",
+    "theme_color": "ff7139",
+    "icons": [
+        {
+            "src": "icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml"
+        }
+    ]
+}

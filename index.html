@@ -3,67 +3,86 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="description" content="Coding timer with streaks, badges, and local leaderboards. " />
-        <title>Regain Code Timer - Step 1</title>
+        <meta name="description" content="Offline-first coding session timer withstreaks, badges, and local leaderboards" />
+        <title>Regain Code Timer</title>
+        <link rel="manifest" href="manifest.webmanifest" />
         <link rel="stylesheet" href="style.css" />
     </head>
     <body>
         <div class="page">
             <header class="hero">
             <div>
-                <p class="eyebrow hero-eyebrow">Coding tracker</p>
-                <h1 class="hero-title">Regain Code Timer</h1>
-                <p class="intro">Step 3 adds badges, leaderboards, and a wider dashboard layout.</p>
+                <p class="eyebrow">Offline Coding tracker</p>
+                <h1>Regain Code Timer</h1>
+                <p class="intro">
+                    Track coding time, keep your streak alive, unlock badges, and review your best sessions. 
+                </p>
             </div>
-            <div class="profile-chip" id="profilePill">Coder</div>
+            <div class="hero-status">
+                <span class="status-dot"></span>
+                <span id="netStatus">Offline-ready</span>
+            </div>
         </header>
 
-        <main class="wrap layout">
-            <section class="card panel timer-panel">
+        <main class="layout">
+            <section class="panel timer-panel">
                 <div class="panel-head">
                     <div>
-                        <h2 class="panel-h2">Current Session</h2>
-                        <p class="panel-lede">Everything below keeps the Step 1 timer block.</p>
+                        <h2>Current Session</h2>
+                        <p class="panel-copy">Use this like a simple coding stopwatch</p>
                     </div>
+                    <div class="profile-chip" id="profilePill">Coder</div>
                 </div>
-                <p class="eyebrow">Step 1</p>
-                <h2 class="timer-heading">Basic Coding Timer</h2>
-                <p class="copy">A simple stopwatch for coding sessions.</p>
-                <p class="copy copy-step2">This step adds local save, streaks, and a session list.</p>
-                <label class="field" for="profileName">Name</label>
-                <input id="profileName" type="text" placeholder="Your name" maxlength="24" /> 
-                <div class="timer" id="timerDisplay">00:00:00</div>
-                <p class="status" id="timerSub">Ready to start.</p>
-                <div class="actions">
-                    <button id="startBtn" type="button">Start</button>
-                    <button id="pauseBtn" type="button">Pause</button>
-                    <button id="resetBtn" type="button">Reset</button>
-                    <button id="logBtn" type="button">Stop & Log</button>
+
+                <label class="field" for="profileName">
+                    <span>Name</span>
+                    <input id="profileName" type="text" placeholder="Enter your name" maxlength="24" />
+                </label>
+
+                <div class="timer-display" id="timerDisplay">00:00:00</div>
+                <p class="timer-sub" id="timerSub">Ready to start a coding session.</p>
+
+                <div class="button-row">
+                    <button id="startBtn" class="btn btn-primary">Start</button>
+                    <button id="pauseBtn" class="btn">Pause</button>
+                    <button id="resetBtn" class="btn">Reset</button>
+                    <button id="logBtn" class="btn btn-muted">Stop & Log</button>
                 </div>
-                <div class="stats">
-                    <div><span>Total</span><strong id="totalTime">0h 0m</strong></div>
-                    <div><span>Streak</span><strong id="streak">0 days</strong></div>
-                    <div><span>Best</span><strong id="bestStreak">0 days</strong></div>
+
+                <div class="stats-grid">
+                    <article class="stat-box">
+                        <span class="stat-label">Total time</span>
+                        <strong class="stat-value" id="totalTime">0h 0m</strong>
+                    </article>
+                    <article class="stat-box">
+                        <span class="stat-label">Current streak</span>
+                        <strong class="stat-value" id="streak">0 days</strong>
+                    </article>
+                    <article class="stat-box">
+                        <span class="stats-label">Best streak</span>
+                        <strong class="stat-value" id="bestStreak">0 days</strong>
+                    </article>
                 </div>
             </section>
 
-            <section class="card panel">
+            <section class="panel">
                 <div class="panel-head">
                     <div>
-                        <h2 class="panel-h2">Badges</h2>
-                        <p class="panel-lede">Small milestones to keep the momentum going.</p>
+                        <h2>Badges</h2>
+                        <p class="panel-copy">Small milestones to keep the momentum going.</p>
                     </div>
                 </div>
                 <div class="badge-grid" id=badgeGrid></div>
             </section>
 
-            <section class="card panel">
+            <section class="panel">
                 <div class="panel-head">
                     <div>
-                        <h2 class="panel-h2">Leaderboard</h2>
-                        <p class="panel-lede">Stored on your device only.</p>
+                        <h2>Leaderboard</h2>
+                        <p class="panel-copy">Stored on your device only.</p>
                     </div>
                 </div>
+
                 <div class="leaderboard-grid">
                     <div class="list-card">
                         <h3>Top Sessions</h3>
@@ -76,18 +95,30 @@
                 </div>
             </section>
 
-            <section class="card panel card-history">
+            <section class="panel">
                 <div class="panel-head">
                     <div>
-            <h2 class="panel-h2">Recent Sessions</h2>
-            <p class="panel-lede">Your latest saved coding logs.</p>
+            <h2>Recent Sessions</h2>
+            <p class="panel-copy">Your latest saved coding logs.</p>
                     </div>
                 </div>
-            <div id="historyList" class="history"></div>
+            <div class="history-list" id="historyList"></div>
         </section>
         </main>
+
+        <footer class="footer">
+            Works offlineafter the first load. All session data stays in your browser.
+        </footer>
     </div>
+
         <script src="app.js"></script>
+        <script>
+            if ("serviceWorker" in navigator) {
+                window.addEventListener("load", () => {
+                    navigator.serviceWorker.register("./sw.js");
+                });
+            }
+            </script>
     </body>
     </html>
     
